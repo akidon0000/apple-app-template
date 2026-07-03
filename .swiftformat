@@ -1,0 +1,7 @@
+# SwiftFormat 設定（SwiftLint と競合しないよう trailing comma は常に付与）
+--swiftversion 6.0
+--exclude .build,DerivedData
+
+--indent 4
+--maxwidth 120
+--commas always

@@ -1,0 +1,54 @@
+name: AppTemplate
+
+options:
+  bundleIdPrefix: com.akidon0000
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  AppTemplate:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - Sources
+      - Resources
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+
+  AppTemplateTests:
+    type: bundle.unit-test
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - Tests
+    dependencies:
+      - target: AppTemplate
+    settings:
+      base:
+        # XcodeGen はマルチプラットフォームターゲットでも iOS 形式の TEST_HOST を
+        # 生成するため、macOS のみアプリバンドル内の実バイナリパスに差し替える
+        TEST_HOST[sdk=macosx*]: $(BUILT_PRODUCTS_DIR)/AppTemplate.app/Contents/MacOS/AppTemplate
+
+schemes:
+  AppTemplate:
+    build:
+      targets:
+        AppTemplate: all
+    test:
+      targets:
+        - AppTemplateTests

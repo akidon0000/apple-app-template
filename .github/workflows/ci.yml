@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: brew install swiftlint swiftformat
+      - name: SwiftLint
+        run: swiftlint --strict
+      - name: SwiftFormat (lint)
+        run: swiftformat --lint .
+
+  test:
+    runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [iOS, macOS]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Select destination
+        id: dest
+        run: |
+          if [ "${{ matrix.platform }}" = "iOS" ]; then
+            device=$(xcrun simctl list devices available -j \
+              | jq -r '[.devices[] | .[] | select(.name | startswith("iPhone"))] | first | .name')
+            echo "destination=platform=iOS Simulator,name=$device" >> "$GITHUB_OUTPUT"
+          else
+            echo "destination=platform=macOS" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project AppTemplate.xcodeproj \
+            -scheme AppTemplate \
+            -destination "${{ steps.dest.outputs.destination }}" \
+            CODE_SIGNING_ALLOWED=NO | xcbeautify

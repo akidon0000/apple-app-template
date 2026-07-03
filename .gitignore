@@ -1,16 +1,15 @@
 # macOS
 .DS_Store
 
-# Logs / env
-*.log
+# Xcode / XcodeGen（.xcodeproj は project.yml から生成するため管理しない）
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+.build/
+.swiftpm/
+
+# Env / logs
 .env
 .env.local
-
-# Editors
-.vscode/
-.idea/
-
-# Common build output
-node_modules/
-dist/
-build/
+*.log
